@@ -109,8 +109,9 @@ function tp_gcr_options_page() {
 // Ustawienia języka formularza opt-in
 function tp_google_customer_reviews_language() {
     $language = get_option( 'tp_gcr_language', 'pl' );
-    wp_enqueue_script( 'google_customer_reviews_language_script', '', [], false, true );
-    wp_add_inline_script( 'google_customer_reviews_language_script', "window.___gcfg = {lang: '" . esc_js( $language ) . "'};" );
+    wp_register_script( 'tp-gcr-lang', false, [], false, true );
+    wp_enqueue_script( 'tp-gcr-lang' );
+    wp_add_inline_script( 'tp-gcr-lang', "window.___gcfg = {lang: '" . esc_js( $language ) . "'};" );
 }
 add_action( 'wp_enqueue_scripts', 'tp_google_customer_reviews_language', 20 );
 
