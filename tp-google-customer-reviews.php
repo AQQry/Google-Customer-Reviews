@@ -1,7 +1,7 @@
 <?php
 /*
- * Plugin Name: TP Google Customer Reviews dla WooCommerce
- * Description: Integracja Google Customer Reviews z WooCommerce, zbierająca opinie klientów po zakupie, z możliwością zarządzania Merchant ID, językiem i czasem dostawy.
+ * Plugin Name: TP Google Customer Reviews for WooCommerce
+ * Description: Integrates Google Customer Reviews with WooCommerce, collecting customer feedback after purchase with configurable Merchant ID, language, and delivery time.
  * Version: 1.3.0
  * Author: TopPosition.eu
  * Author URI: https://www.topposition.eu/
@@ -12,30 +12,30 @@
  * Text Domain: tp-gcr
  */
 
-// Ładowanie tłumaczeń wtyczki
+// Load plugin translations
 function tp_gcr_load_textdomain() {
     load_plugin_textdomain( 'tp-gcr', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 add_action( 'plugins_loaded', 'tp_gcr_load_textdomain' );
 
-// Pobieranie ustawień wtyczki z minimalizacją wywołań get_option
+// Retrieve plugin settings with minimized get_option calls
 function tp_gcr_get_options() {
     static $options = null;
     if ( null === $options ) {
         $options = [
             'merchant_id'   => get_option( 'tp_gcr_merchant_id', '' ),
-            'language'      => get_option( 'tp_gcr_language', 'pl' ),
+            'language'      => get_option( 'tp_gcr_language', 'en' ),
             'delivery_days' => (int) get_option( 'tp_gcr_delivery_days', 3 ),
         ];
     }
     return $options;
 }
 
-// Dodanie menu ustawień wtyczki
+// Add plugin settings menu
 function tp_gcr_add_admin_menu() {
     add_options_page(
-        'TP Google Customer Reviews',
-        'TP Google Customer Reviews',
+        __( 'TP Google Customer Reviews', 'tp-gcr' ),
+        __( 'TP Google Customer Reviews', 'tp-gcr' ),
         'manage_options',
         'tp-google-customer-reviews',
         'tp_gcr_options_page'
@@ -43,7 +43,7 @@ function tp_gcr_add_admin_menu() {
 }
 add_action( 'admin_menu', 'tp_gcr_add_admin_menu' );
 
-// Funkcje sanitizujące
+// Sanitization functions
 function tp_gcr_sanitize_merchant_id( $value ) {
     return absint( $value );
 }
@@ -56,7 +56,7 @@ function tp_gcr_sanitize_delivery_days( $value ) {
     return absint( $value );
 }
 
-// Rejestracja ustawień
+// Register settings
 function tp_gcr_settings_init() {
     register_setting( 'tp_gcr_settings', 'tp_gcr_merchant_id', 'tp_gcr_sanitize_merchant_id' );
     register_setting( 'tp_gcr_settings', 'tp_gcr_language', 'tp_gcr_sanitize_language' );
@@ -64,7 +64,7 @@ function tp_gcr_settings_init() {
 
     add_settings_section(
         'tp_gcr_section',
-        __( 'Ustawienia Google Customer Reviews', 'tp-gcr' ),
+        __( 'Google Customer Reviews Settings', 'tp-gcr' ),
         null,
         'tp-google-customer-reviews'
     );
@@ -79,7 +79,7 @@ function tp_gcr_settings_init() {
 
     add_settings_field(
         'tp_gcr_language',
-        __( 'Język', 'tp-gcr' ),
+        __( 'Language', 'tp-gcr' ),
         'tp_gcr_language_render',
         'tp-google-customer-reviews',
         'tp_gcr_section'
@@ -87,7 +87,7 @@ function tp_gcr_settings_init() {
 
     add_settings_field(
         'tp_gcr_delivery_days',
-        __( 'Przewidywany czas dostawy (dni)', 'tp-gcr' ),
+        __( 'Estimated delivery time (days)', 'tp-gcr' ),
         'tp_gcr_delivery_days_render',
         'tp-google-customer-reviews',
         'tp_gcr_section'
@@ -95,14 +95,14 @@ function tp_gcr_settings_init() {
 }
 add_action( 'admin_init', 'tp_gcr_settings_init' );
 
-// Funkcje renderujące pola
+// Field rendering functions
 function tp_gcr_merchant_id_render() {
     $merchant_id = get_option( 'tp_gcr_merchant_id', '' );
     echo "<input type='text' name='tp_gcr_merchant_id' value='" . esc_attr( $merchant_id ) . "' />";
 }
 
 function tp_gcr_language_render() {
-    $language = get_option( 'tp_gcr_language', 'pl' );
+    $language = get_option( 'tp_gcr_language', 'en' );
     echo "<input type='text' name='tp_gcr_language' value='" . esc_attr( $language ) . "' />";
 }
 
@@ -111,11 +111,11 @@ function tp_gcr_delivery_days_render() {
     echo "<input type='number' name='tp_gcr_delivery_days' value='" . esc_attr( $delivery_days ) . "' min='1' />";
 }
 
-// Strona ustawień
+// Settings page
 function tp_gcr_options_page() {
     ?>
     <form action='options.php' method='post'>
-        <h2>TP Google Customer Reviews dla WooCommerce</h2>
+        <h2><?php esc_html_e( 'TP Google Customer Reviews for WooCommerce', 'tp-gcr' ); ?></h2>
         <?php
         settings_fields( 'tp_gcr_settings' );
         do_settings_sections( 'tp-google-customer-reviews' );
@@ -125,7 +125,7 @@ function tp_gcr_options_page() {
     <?php
 }
 
-// Ustawienia języka formularza opt-in
+// Opt-in form language settings
 function tp_google_customer_reviews_language() {
     $options = tp_gcr_get_options();
     wp_enqueue_script(
@@ -139,7 +139,7 @@ function tp_google_customer_reviews_language() {
 }
 add_action( 'wp_enqueue_scripts', 'tp_google_customer_reviews_language', 20 );
 
-// Dodanie formularza opt-in Google Customer Reviews do strony WooCommerce
+// Add Google Customer Reviews opt-in form to WooCommerce page
 function tp_google_customer_reviews_optin( $order_id ) {
     if ( ! function_exists( 'wc_get_order' ) || ! function_exists( 'wc_get_product' ) ) {
         return;
