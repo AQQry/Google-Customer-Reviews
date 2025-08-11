@@ -24,11 +24,24 @@ function tp_gcr_add_admin_menu() {
 }
 add_action( 'admin_menu', 'tp_gcr_add_admin_menu' );
 
+// Funkcje sanitizujące
+function tp_gcr_sanitize_merchant_id( $value ) {
+    return absint( $value );
+}
+
+function tp_gcr_sanitize_language( $value ) {
+    return sanitize_text_field( $value );
+}
+
+function tp_gcr_sanitize_delivery_days( $value ) {
+    return absint( $value );
+}
+
 // Rejestracja ustawień
 function tp_gcr_settings_init() {
-    register_setting( 'tp_gcr_settings', 'tp_gcr_merchant_id' );
-    register_setting( 'tp_gcr_settings', 'tp_gcr_language' );
-    register_setting( 'tp_gcr_settings', 'tp_gcr_delivery_days' );
+    register_setting( 'tp_gcr_settings', 'tp_gcr_merchant_id', 'tp_gcr_sanitize_merchant_id' );
+    register_setting( 'tp_gcr_settings', 'tp_gcr_language', 'tp_gcr_sanitize_language' );
+    register_setting( 'tp_gcr_settings', 'tp_gcr_delivery_days', 'tp_gcr_sanitize_delivery_days' );
 
     add_settings_section(
         'tp_gcr_section',
