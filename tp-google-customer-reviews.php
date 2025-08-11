@@ -304,10 +304,10 @@ function tp_google_customer_reviews_optin( $order_id ) {
         $delivery_date = date( 'Y-m-d', strtotime( '+' . $delivery_days . ' days' ) );
     }
 
+    $GLOBALS['tp_gcr_load_platform'] = true;
     ?>
-    <script src="https://apis.google.com/js/platform.js?onload=renderOptIn" async defer></script>
     <script>
-        function renderOptIn() {
+        function tpGcrRenderOptIn() {
             window.gapi.load('surveyoptin', function() {
                 window.gapi.surveyoptin.render({
                     "merchant_id": "<?php echo esc_js( $merchant_id ); ?>",
@@ -315,13 +315,13 @@ function tp_google_customer_reviews_optin( $order_id ) {
                     "email": "<?php echo esc_js( $order->get_billing_email() ); ?>",
                     "delivery_country": "<?php echo esc_js( $order->get_billing_country() ); ?>",
                     "estimated_delivery_date": "<?php echo esc_js( $delivery_date ); ?>",
-                    "opt_in_style": "<?php echo esc_js( $options['opt_in_style'] ); ?>",
-                    <?php if ( ! empty( $products ) ) : ?>
-                    "products": <?php echo wp_json_encode( $products ); ?>
-                    <?php endif; ?>
+                    "opt_in_style": "<?php echo esc_js( $options['opt_in_style'] ); ?>"<?php if ( ! empty( $products ) ) : ?>,
+                    "products": <?php echo wp_json_encode( $products ); ?><?php endif; ?>
                 });
             });
         }
+        window.tpGcrCallbacks = window.tpGcrCallbacks || [];
+        window.tpGcrCallbacks.push( tpGcrRenderOptIn );
     </script>
     <?php
 }
@@ -344,10 +344,10 @@ function tp_google_customer_reviews_badge() {
         return;
     }
     $position = strtoupper( str_replace( 'bottom_', 'BOTTOM_', $position ) );
+    $GLOBALS['tp_gcr_load_platform'] = true;
     ?>
-    <script src="https://apis.google.com/js/platform.js?onload=renderBadge" async defer></script>
     <script>
-        function renderBadge() {
+        function tpGcrRenderBadge() {
             var ratingBadgeContainer = document.createElement('div');
             document.body.appendChild(ratingBadgeContainer);
             window.gapi.load('ratingbadge', function() {
@@ -357,7 +357,27 @@ function tp_google_customer_reviews_badge() {
                 });
             });
         }
+        window.tpGcrCallbacks = window.tpGcrCallbacks || [];
+        window.tpGcrCallbacks.push( tpGcrRenderBadge );
     </script>
     <?php
 }
 add_action( 'wp_footer', 'tp_google_customer_reviews_badge' );
+
+function tp_gcr_enqueue_platform() {
+    if ( empty( $GLOBALS['tp_gcr_load_platform'] ) ) {
+        return;
+    }
+    ?>
+    <script>
+        window.tpGcrCallbacks = window.tpGcrCallbacks || [];
+        function tpGcrRunCallbacks() {
+            window.tpGcrCallbacks.forEach(function(callback){
+                callback();
+            });
+        }
+    </script>
+    <script src="https://apis.google.com/js/platform.js?onload=tpGcrRunCallbacks" async defer></script>
+    <?php
+}
+add_action( 'wp_footer', 'tp_gcr_enqueue_platform', 100 );
