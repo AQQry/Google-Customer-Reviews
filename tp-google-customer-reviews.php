@@ -127,9 +127,12 @@ function tp_google_customer_reviews_optin( $order_id ) {
     $products = [];
 
     foreach ( $order->get_items() as $item ) {
-        $gtin = wc_get_product( $item->get_product_id() )->get_meta('_gtin');
-        if ( $gtin ) {
-            $products[] = ['gtin' => $gtin];
+        $product = wc_get_product( $item->get_product_id() );
+        if ( $product ) {
+            $gtin = $product->get_meta('_gtin');
+            if ( $gtin ) {
+                $products[] = [ 'gtin' => $gtin ];
+            }
         }
     }
 
