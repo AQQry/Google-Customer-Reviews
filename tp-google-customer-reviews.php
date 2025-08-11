@@ -27,6 +27,10 @@ function tp_gcr_get_options() {
             'merchant_id'   => get_option( 'tp_gcr_merchant_id', '' ),
             'language'      => get_option( 'tp_gcr_language', 'en' ),
             'delivery_days' => (int) get_option( 'tp_gcr_delivery_days', 3 ),
+            'badge_enabled' => (bool) get_option( 'tp_gcr_badge_enabled', 0 ),
+            'badge_shop'    => (bool) get_option( 'tp_gcr_badge_shop_only', 0 ),
+            'badge_position'=> get_option( 'tp_gcr_badge_position', 'none' ),
+            'opt_in_style'  => get_option( 'tp_gcr_opt_in_style', 'CENTER_DIALOG' ),
         ];
     }
     return $options;
@@ -61,12 +65,26 @@ function tp_gcr_sanitize_enabled( $value ) {
     return $value ? 1 : 0;
 }
 
+function tp_gcr_sanitize_badge_position( $value ) {
+    $allowed = [ 'none', 'bottom_left', 'bottom_right' ];
+    return in_array( $value, $allowed, true ) ? $value : 'none';
+}
+
+function tp_gcr_sanitize_opt_in_style( $value ) {
+    $allowed = [ 'CENTER_DIALOG', 'BOTTOM_LEFT_DIALOG', 'BOTTOM_RIGHT_DIALOG' ];
+    return in_array( $value, $allowed, true ) ? $value : 'CENTER_DIALOG';
+}
+
 // Register settings
 function tp_gcr_settings_init() {
     register_setting( 'tp_gcr_settings', 'tp_gcr_enabled', 'tp_gcr_sanitize_enabled' );
     register_setting( 'tp_gcr_settings', 'tp_gcr_merchant_id', 'tp_gcr_sanitize_merchant_id' );
     register_setting( 'tp_gcr_settings', 'tp_gcr_language', 'tp_gcr_sanitize_language' );
     register_setting( 'tp_gcr_settings', 'tp_gcr_delivery_days', 'tp_gcr_sanitize_delivery_days' );
+    register_setting( 'tp_gcr_settings', 'tp_gcr_badge_enabled', 'tp_gcr_sanitize_enabled' );
+    register_setting( 'tp_gcr_settings', 'tp_gcr_badge_shop_only', 'tp_gcr_sanitize_enabled' );
+    register_setting( 'tp_gcr_settings', 'tp_gcr_badge_position', 'tp_gcr_sanitize_badge_position' );
+    register_setting( 'tp_gcr_settings', 'tp_gcr_opt_in_style', 'tp_gcr_sanitize_opt_in_style' );
 
     add_settings_section(
         'tp_gcr_section',
@@ -106,6 +124,52 @@ function tp_gcr_settings_init() {
         'tp-google-customer-reviews',
         'tp_gcr_section'
     );
+
+    add_settings_section(
+        'tp_gcr_badge_section',
+        __( 'Rating Badge Settings', 'tp-gcr' ),
+        null,
+        'tp-google-customer-reviews'
+    );
+
+    add_settings_field(
+        'tp_gcr_badge_enabled',
+        __( 'Enable Rating Badge', 'tp-gcr' ),
+        'tp_gcr_badge_enabled_render',
+        'tp-google-customer-reviews',
+        'tp_gcr_badge_section'
+    );
+
+    add_settings_field(
+        'tp_gcr_badge_shop_only',
+        __( 'Only Show Badge in Shop', 'tp-gcr' ),
+        'tp_gcr_badge_shop_only_render',
+        'tp-google-customer-reviews',
+        'tp_gcr_badge_section'
+    );
+
+    add_settings_field(
+        'tp_gcr_badge_position',
+        __( 'Rating Badge Position', 'tp-gcr' ),
+        'tp_gcr_badge_position_render',
+        'tp-google-customer-reviews',
+        'tp_gcr_badge_section'
+    );
+
+    add_settings_section(
+        'tp_gcr_popup_section',
+        __( 'Survey Opt-in Popup Settings', 'tp-gcr' ),
+        null,
+        'tp-google-customer-reviews'
+    );
+
+    add_settings_field(
+        'tp_gcr_opt_in_style',
+        __( 'Popup Position', 'tp-gcr' ),
+        'tp_gcr_opt_in_style_render',
+        'tp-google-customer-reviews',
+        'tp_gcr_popup_section'
+    );
 }
 add_action( 'admin_init', 'tp_gcr_settings_init' );
 
@@ -128,6 +192,44 @@ function tp_gcr_language_render() {
 function tp_gcr_delivery_days_render() {
     $options = tp_gcr_get_options();
     echo "<input type='number' name='tp_gcr_delivery_days' value='" . esc_attr( $options['delivery_days'] ) . "' min='1' />";
+}
+
+function tp_gcr_badge_enabled_render() {
+    $options = tp_gcr_get_options();
+    echo "<input type='checkbox' name='tp_gcr_badge_enabled' value='1' " . checked( $options['badge_enabled'], 1, false ) . " />";
+}
+
+function tp_gcr_badge_shop_only_render() {
+    $options = tp_gcr_get_options();
+    echo "<input type='checkbox' name='tp_gcr_badge_shop_only' value='1' " . checked( $options['badge_shop'], 1, false ) . " />";
+}
+
+function tp_gcr_badge_position_render() {
+    $options   = tp_gcr_get_options();
+    $positions = [
+        'none'        => __( 'None', 'tp-gcr' ),
+        'bottom_left' => __( 'Bottom Left', 'tp-gcr' ),
+        'bottom_right'=> __( 'Bottom Right', 'tp-gcr' ),
+    ];
+    echo "<select name='tp_gcr_badge_position'>";
+    foreach ( $positions as $value => $label ) {
+        echo "<option value='" . esc_attr( $value ) . "' " . selected( $options['badge_position'], $value, false ) . ">" . esc_html( $label ) . "</option>";
+    }
+    echo '</select>';
+}
+
+function tp_gcr_opt_in_style_render() {
+    $options   = tp_gcr_get_options();
+    $positions = [
+        'CENTER_DIALOG'       => __( 'Center', 'tp-gcr' ),
+        'BOTTOM_LEFT_DIALOG'  => __( 'Bottom Left', 'tp-gcr' ),
+        'BOTTOM_RIGHT_DIALOG' => __( 'Bottom Right', 'tp-gcr' ),
+    ];
+    echo "<select name='tp_gcr_opt_in_style'>";
+    foreach ( $positions as $value => $label ) {
+        echo "<option value='" . esc_attr( $value ) . "' " . selected( $options['opt_in_style'], $value, false ) . ">" . esc_html( $label ) . "</option>";
+    }
+    echo '</select>';
 }
 
 // Settings page
@@ -213,7 +315,7 @@ function tp_google_customer_reviews_optin( $order_id ) {
                     "email": "<?php echo esc_js( $order->get_billing_email() ); ?>",
                     "delivery_country": "<?php echo esc_js( $order->get_billing_country() ); ?>",
                     "estimated_delivery_date": "<?php echo esc_js( $delivery_date ); ?>",
-                    "opt_in_style": "CENTER_DIALOG",
+                    "opt_in_style": "<?php echo esc_js( $options['opt_in_style'] ); ?>",
                     <?php if ( ! empty( $products ) ) : ?>
                     "products": <?php echo wp_json_encode( $products ); ?>
                     <?php endif; ?>
@@ -227,3 +329,35 @@ function tp_google_customer_reviews_optin( $order_id ) {
 if ( function_exists( 'wc_get_order' ) ) {
     add_action( 'woocommerce_thankyou', 'tp_google_customer_reviews_optin' );
 }
+
+function tp_google_customer_reviews_badge() {
+    $options = tp_gcr_get_options();
+    if ( ! $options['badge_enabled'] ) {
+        return;
+    }
+    if ( $options['badge_shop'] && !( function_exists( 'is_woocommerce' ) && is_woocommerce() ) ) {
+        return;
+    }
+    $merchant_id = $options['merchant_id'];
+    $position    = $options['badge_position'];
+    if ( empty( $merchant_id ) || 'none' === $position ) {
+        return;
+    }
+    $position = strtoupper( str_replace( 'bottom_', 'BOTTOM_', $position ) );
+    ?>
+    <script src="https://apis.google.com/js/platform.js?onload=renderBadge" async defer></script>
+    <script>
+        function renderBadge() {
+            var ratingBadgeContainer = document.createElement('div');
+            document.body.appendChild(ratingBadgeContainer);
+            window.gapi.load('ratingbadge', function() {
+                window.gapi.ratingbadge.render(ratingBadgeContainer, {
+                    "merchant_id": "<?php echo esc_js( $merchant_id ); ?>",
+                    "position": "<?php echo esc_js( $position ); ?>"
+                });
+            });
+        }
+    </script>
+    <?php
+}
+add_action( 'wp_footer', 'tp_google_customer_reviews_badge' );

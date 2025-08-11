@@ -7,7 +7,7 @@ Google Customer Reviews for WooCommerce
 3. Go to **Settings -> TP Google Customer Reviews** and enter your Google Merchant ID, choose the language, set the estimated delivery time, and enable or disable the integration as needed.
 
 ## Usage
-Once configured, the plugin adds the Google Customer Reviews opt-in to completed WooCommerce orders and sends review invitations after the estimated delivery time.
+Once configured, the plugin adds the Google Customer Reviews opt-in to completed WooCommerce orders and sends review invitations after the estimated delivery time. You can also display a rating badge on the frontend and choose positions for both the badge and the opt-in popup.
 
 ---
 
@@ -17,4 +17,4 @@ Once configured, the plugin adds the Google Customer Reviews opt-in to completed
 3. Przejdź do **Ustawienia -> TP Google Customer Reviews**, wpisz swój Google Merchant ID, wybierz język, ustaw przewidywany czas dostawy i włącz lub wyłącz integrację wtyczki.
 
 ## Użycie
-Po konfiguracji wtyczka dodaje formularz zgody Google Customer Reviews do zamówień WooCommerce i wysyła zaproszenia do zostawienia opinii po upływie przewidywanego czasu dostawy.
+Po konfiguracji wtyczka dodaje formularz zgody Google Customer Reviews do zamówień WooCommerce i wysyła zaproszenia do zostawienia opinii po upływie przewidywanego czasu dostawy. Możliwe jest również wyświetlenie odznaki ocen w wybranym miejscu oraz określenie położenia okna zgody.
