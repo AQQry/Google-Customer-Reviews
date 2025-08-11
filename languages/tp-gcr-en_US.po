@@ -34,3 +34,7 @@ msgstr "Estimated delivery time (days)"
 msgid "TP Google Customer Reviews for WooCommerce"
 msgstr "TP Google Customer Reviews for WooCommerce"
 
+#: tp-google-customer-reviews.php:76
+msgid "Enable Google Customer Reviews"
+msgstr "Enable Google Customer Reviews"
+
