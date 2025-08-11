@@ -15,8 +15,8 @@
 // Dodanie menu ustawień wtyczki
 function tp_gcr_add_admin_menu() {
     add_options_page(
-        'TP Google Customer Reviews',
-        'TP Google Customer Reviews',
+        __( 'TP Google Customer Reviews dla WooCommerce', 'tp-gcr' ),
+        __( 'TP Google Customer Reviews dla WooCommerce', 'tp-gcr' ),
         'manage_options',
         'tp-google-customer-reviews',
         'tp_gcr_options_page'
@@ -81,9 +81,12 @@ function tp_gcr_delivery_days_render() {
 
 // Strona ustawień
 function tp_gcr_options_page() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
     ?>
     <form action='options.php' method='post'>
-        <h2>TP Google Customer Reviews dla WooCommerce</h2>
+        <h2><?php esc_html_e( 'TP Google Customer Reviews dla WooCommerce', 'tp-gcr' ); ?></h2>
         <?php
         settings_fields( 'tp_gcr_settings' );
         do_settings_sections( 'tp-google-customer-reviews' );
