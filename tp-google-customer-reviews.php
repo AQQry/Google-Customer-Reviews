@@ -289,7 +289,9 @@ function tp_google_customer_reviews_optin( $order_id ) {
     foreach ( $order->get_items() as $item ) {
         $product = wc_get_product( $item->get_product_id() );
         if ( $product ) {
-            $gtin = $product->get_meta('_gtin');
+            $gtin_meta_key = apply_filters( 'tpgcr_gtin_meta_key', '_gtin', $product );
+            $gtin          = $product->get_meta( $gtin_meta_key );
+            $gtin          = apply_filters( 'tpgcr_gtin_value', $gtin, $product );
             if ( $gtin ) {
                 $products[] = [ 'gtin' => $gtin ];
             }
